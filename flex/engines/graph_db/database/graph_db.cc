@@ -253,6 +253,7 @@ void GraphDB::Close() {
   }
   std::fill(app_paths_.begin(), app_paths_.end(), "");
   std::fill(app_factories_.begin(), app_factories_.end(), nullptr);
+  std::fill(apps_.begin(), apps_.end(), nullptr);
 }
 
 ReadTransaction GraphDB::GetReadTransaction() {
@@ -340,6 +341,19 @@ void GraphDB::GetAppInfo(Encoder& output) {
   }
 }
 
+AppBase* GraphDB::GetApp(int type) {
+  if (type >= GraphDBSession::MAX_PLUGIN_NUM) {
+    LOG(ERROR) << "Query type is out of range: " << type << " > "
+               << GraphDBSession::MAX_PLUGIN_NUM;
+    return nullptr;
+  }
+  if (apps_[type] == nullptr) {
+    LOG(ERROR) << "[Query-" + std::to_string((int) type) << "] is not fund...";
+    return nullptr;
+  }
+  return apps_[type];
+}
+
 static void IngestWalRange(SessionLocalContext* contexts,
                            MutablePropertyFragment& graph,
                            const WalsParser& parser, uint32_t from, uint32_t to,
@@ -400,8 +414,9 @@ void GraphDB::initApps(
         plugins) {
   VLOG(1) << "Initializing stored procedures, size: " << plugins.size()
           << " ...";
-  for (size_t i = 0; i < 256; ++i) {
+  for (size_t i = 0; i < MAX_PLUGIN_NUM; ++i) {
     app_factories_[i] = nullptr;
+    apps_[i] = nullptr;
   }
   // Builtin apps
   app_factories_[0] = std::make_shared<ServerAppFactory>();
@@ -418,10 +433,11 @@ void GraphDB::initApps(
     auto index = path_and_index.second.second;
     if (registerApp(path, index)) {
       ++valid_plugins;
+      apps_[index] = app_factories_[index]->CreateApp(*this).app();
     }
   }
-  LOG(INFO) << "Successfully registered stored procedures : " << valid_plugins
-            << ", from " << plugins.size();
+  LOG(INFO) << "Successfully registered and created stored procedures : "
+            << valid_plugins << ", from " << plugins.size();
 }
 
 void GraphDB::openWalAndCreateContexts(const std::string& data_dir,

@@ -199,33 +199,10 @@ double GraphDBSession::eval_duration() const {
 
 int64_t GraphDBSession::query_num() const { return query_num_.load(); }
 
-#define likely(x) __builtin_expect(!!(x), 1)
-
 AppBase* GraphDBSession::GetApp(int type) {
-  // create if not exist
-  if (type >= GraphDBSession::MAX_PLUGIN_NUM) {
-    LOG(ERROR) << "Query type is out of range: " << type << " > "
-               << GraphDBSession::MAX_PLUGIN_NUM;
-    return nullptr;
-  }
-  AppBase* app = nullptr;
-  if (likely(apps_[type] != nullptr)) {
-    app = apps_[type];
-  } else {
-    app_wrappers_[type] = db_.CreateApp(type, thread_id_);
-    if (app_wrappers_[type].app() == NULL) {
-      LOG(ERROR) << "[Query-" + std::to_string((int) type)
-                 << "] is not registered...";
-      return nullptr;
-    } else {
-      apps_[type] = app_wrappers_[type].app();
-      app = apps_[type];
-    }
-  }
-  return app;
+  // db's GetApp() will check it
+  return db_.GetApp(type);
 }
-
-#undef likely  // likely
 
 Result<std::pair<uint8_t, std::string_view>>
 GraphDBSession::parse_query_type_from_cypher_json(

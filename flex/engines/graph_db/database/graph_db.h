@@ -68,6 +68,7 @@ struct GraphDBConfig {
 };
 
 class GraphDB {
+  static constexpr int32_t MAX_PLUGIN_NUM = 256;  // 2^(sizeof(uint8_t)*8)
  public:
   GraphDB();
   ~GraphDB();
@@ -141,6 +142,8 @@ class GraphDB {
 
   void GetAppInfo(Encoder& result);
 
+  AppBase* GetApp(int type);
+
   GraphDBSession& GetSession(int thread_id);
   const GraphDBSession& GetSession(int thread_id) const;
 
@@ -176,8 +179,9 @@ class GraphDB {
   MutablePropertyFragment graph_;
   VersionManager version_manager_;
 
-  std::array<std::string, 256> app_paths_;
-  std::array<std::shared_ptr<AppFactoryBase>, 256> app_factories_;
+  std::array<std::string, MAX_PLUGIN_NUM> app_paths_;
+  std::array<std::shared_ptr<AppFactoryBase>, MAX_PLUGIN_NUM> app_factories_;
+  std::array<AppBase*, MAX_PLUGIN_NUM> apps_;
 
   std::thread monitor_thread_;
   bool monitor_thread_running_;
