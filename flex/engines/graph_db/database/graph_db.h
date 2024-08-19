@@ -142,8 +142,6 @@ class GraphDB {
 
   void GetAppInfo(Encoder& result);
 
-  AppBase* GetApp(int type);
-
   AppWrapper GetAppWrapper(int type);
 
   GraphDBSession& GetSession(int thread_id);
@@ -183,7 +181,6 @@ class GraphDB {
 
   std::array<std::string, MAX_PLUGIN_NUM> app_paths_;
   std::array<std::shared_ptr<AppFactoryBase>, MAX_PLUGIN_NUM> app_factories_;
-  std::array<AppBase*, MAX_PLUGIN_NUM> apps_;
   std::array<AppWrapper, MAX_PLUGIN_NUM> app_wrappers_;
 
   std::thread monitor_thread_;
