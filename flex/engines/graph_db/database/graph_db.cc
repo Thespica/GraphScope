@@ -354,6 +354,15 @@ AppBase* GraphDB::GetApp(int type) {
   return apps_[type];
 }
 
+AppWrapper GraphDB::GetAppWrapper(int type) {
+  if (type >= GraphDBSession::MAX_PLUGIN_NUM) {
+    LOG(ERROR) << "Query type is out of range: " << type << " > "
+               << GraphDBSession::MAX_PLUGIN_NUM;
+        return AppWrapper{};
+  }
+  return app_wrappers_[type];
+}
+
 static void IngestWalRange(SessionLocalContext* contexts,
                            MutablePropertyFragment& graph,
                            const WalsParser& parser, uint32_t from, uint32_t to,

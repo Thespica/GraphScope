@@ -56,7 +56,11 @@ class GraphDBSession {
         work_dir_(work_dir),
         thread_id_(thread_id),
         eval_duration_(0),
-        query_num_(0) {}
+        query_num_(0) {
+    for (auto& app : apps_) {
+      app = nullptr;
+    }
+  }
   ~GraphDBSession() {}
 
   ReadTransaction GetReadTransaction() const;
@@ -175,6 +179,8 @@ class GraphDBSession {
   std::string work_dir_;
   int thread_id_;
 
+  std::array<AppWrapper, MAX_PLUGIN_NUM> app_wrappers_;
+  std::array<AppBase*, MAX_PLUGIN_NUM> apps_;
   std::array<AppMetric, MAX_PLUGIN_NUM> app_metrics_;
 
   std::atomic<int64_t> eval_duration_;

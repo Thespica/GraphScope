@@ -86,6 +86,10 @@ class AppWrapper {
     rhs.app_ = NULL;
     rhs.func_deletor_ = NULL;
   }
+  AppWrapper(AppWrapper& rhs) {
+    app_ = rhs.app_;
+    func_deletor_ = rhs.func_deletor_;
+  }
   ~AppWrapper() {
     if (app_ != NULL && func_deletor_ != NULL) {
       func_deletor_(app_);
